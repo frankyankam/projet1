@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:13
+    container_name: postgres
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -26,46 +25,46 @@ services:
       - mysql-data:/var/lib/mysql
 
   airflow-webserver:
-    image: apache/airflow:2.6.3
+    build: .
     container_name: airflow-webserver
-    environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-      - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
     depends_on:
       - postgres
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO
     ports:
       - "8080:8080"
-    entrypoint: >
-      /bin/bash -c "
-      airflow db init &&
-      airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin &&
-      pip install pymysql &&
-      airflow webserver"
+    command:
+      - bash
+      - -c
+      - |
+        airflow db init &&
+        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin || true &&
+        airflow webserver
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
-  
+      - ./shared_data:/opt/airflow/shared_data
+
   airflow-scheduler:
-    image: apache/airflow:2.6.3
+    build: .
     container_name: airflow-scheduler
-    environment:
-      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-      - AIRFLOW__LOGGING__LOGGING_LEVEL=INFO
     depends_on:
       - postgres
       - airflow-webserver
-    entrypoint: >
-      /bin/bash -c "
-      airflow db init &&
-      pip install pymysql &&
-      airflow scheduler"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+      AIRFLOW__LOGGING__LOGGING_LEVEL: INFO
+    command:
+      - bash
+      - -c
+      - airflow scheduler
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
-
+      - ./shared_data:/opt/airflow/shared_data
 volumes:
   postgres-data:
   mysql-data:
-

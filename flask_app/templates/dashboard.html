@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+    <h1> Job Market Dashboard</h1>
+    <p>Offres Data collectées automatiquement</p>
+</header>
+
+<section class="filters">
+    <input type="text" id="entreprise" placeholder="Entreprise">
+    <input type="text" id="adresse" placeholder="Ville">
+    <button onclick="loadJobs()">Filtrer</button>
+</section>
+
+<section>
+    <table>
+        <thead>
+            <tr>
+                <th>Offre</th>
+                <th>Entreprise</th>
+                <th>Adresse</th>
+                <th>Lien</th>
+            </tr>
+        </thead>
+        <tbody id="jobs-table">
+        </tbody>
+    </table>
+</section>
+
+<script>
+async function loadJobs() {
+    const entreprise = document.getElementById("entreprise").value;
+    const adresse = document.getElementById("adresse").value;
+
+    let url = `/jobs?limit=20`;
+
+    if (entreprise) url += `&entreprise=${entreprise}`;
+    if (adresse) url += `&adresse=${adresse}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const table = document.getElementById("jobs-table");
+    table.innerHTML = "";
+
+    data.data.forEach(job => {
+        table.innerHTML += `
+            <tr>
+                <td>${job.offre}</td>
+                <td>${job.entreprise}</td>
+                <td>${job.adresse}</td>
+                <td><a href="${job['lien de description']}" target="_blank">Voir</a></td>
+            </tr>
+        `;
+    });
+}
+
+loadJobs();
+</script>
+
+</body>
+</html>
