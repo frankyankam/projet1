@@ -154,7 +154,8 @@ Accès
 
 Airflow : http://localhost:8080
 
-API Flask : http://localhost:5000
+API Flask : http://localhost:5000/jobs
+            http://localhost:5000/Dashboard
 
 Données de sortie
 
@@ -199,3 +200,4 @@ Auteur
 Yankam Pegmi Frank Jores
 
 Projet orienté Data Engineering, orchestration de pipelines et API data.
+
